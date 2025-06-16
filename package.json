@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-instagram-private-api-wrapped",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "N8N integration with Instagram using private API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,9 +21,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "instagram-private-api": "^1.46.1",
-    "n8n-core": "latest",
-    "n8n-workflow": "^1.0.0"
+    "instagram-private-api": "^1.46.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -34,6 +32,9 @@
     "eslint": "^8.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
   },
   "keywords": [
     "n8n-community-node-package",
@@ -53,5 +54,9 @@
   "bugs": {
     "url": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped/issues"
   },
-  "homepage": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped#readme"
+  "homepage": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped#readme",
+  "files": [
+    "dist/**/*",
+    "package.json"
+  ]
 }
