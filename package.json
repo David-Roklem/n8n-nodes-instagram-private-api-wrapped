@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-instagram-private-api-wrapped",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "N8N integration with Instagram using private API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0"
   },
   "keywords": [
+    "n8n-community-node-package",
     "n8n",
     "instagram",
     "automation",
