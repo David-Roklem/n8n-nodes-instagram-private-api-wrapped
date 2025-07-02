@@ -37,24 +37,6 @@ export class Utils {
   }
 
   /**
-   * Validate image buffer format
-   */
-  static validateImageBuffer(buffer: Buffer): boolean {
-    if (!buffer || buffer.length === 0) {
-      return false;
-    }
-
-    // Check for common image formats (JPEG, PNG)
-    const jpegSignature = Buffer.from([0xFF, 0xD8, 0xFF]);
-    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47]);
-
-    return (
-      buffer.subarray(0, 3).equals(jpegSignature) ||
-      buffer.subarray(0, 4).equals(pngSignature)
-    );
-  }
-
-  /**
    * Sanitize text input to prevent issues with Instagram API
    */
   static sanitizeText(text: string): string {

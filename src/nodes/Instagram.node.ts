@@ -7,8 +7,10 @@ import {
 	NodeConnectionType,
 } from 'n8n-workflow';
 
+import { IInstagramCredentials } from '../lib/types';
+
+// Import the Instagram Client class
 import { InstagramClient } from '../lib/client';
-import { IInstagramCredentials, IInstagramUserInfo, IInstagramMediaItem } from '../lib/types';
 
 export class Instagram implements INodeType {
 	description: INodeTypeDescription = {
@@ -240,6 +242,7 @@ export class Instagram implements INodeType {
 
 		// Initialize Instagram client
 		const client = new InstagramClient(credentials);
+		await client.authenticate(credentials);
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -255,31 +258,39 @@ export class Instagram implements INodeType {
 					} else if (operation === 'getFollowers') {
 						const username = this.getNodeParameter('username', i) as string;
 						const limit = this.getNodeParameter('limit', i, 20) as number;
-						responseData = await client.getFollowers(username, limit);
+						// First get user info to get the user ID
+						const userInfo = await client.getUserInfo(username);
+						responseData = await client.getFollowers(userInfo.pk, limit);
 					} else if (operation === 'getFollowing') {
 						const username = this.getNodeParameter('username', i) as string;
 						const limit = this.getNodeParameter('limit', i, 20) as number;
-						responseData = await client.getFollowing(username, limit);
+						// First get user info to get the user ID
+						const userInfo = await client.getUserInfo(username);
+						responseData = await client.getFollowing(userInfo.pk, limit);
 					}
 				} else if (resource === 'media') {
 					if (operation === 'getUserMedia') {
 						const username = this.getNodeParameter('username', i) as string;
 						const limit = this.getNodeParameter('limit', i, 20) as number;
-						responseData = await client.getUserMedia(username, limit);
+						// First get user info to get the user ID
+						const userInfo = await client.getUserInfo(username);
+						responseData = await client.getUserMedia(userInfo.pk, limit);
 					} else if (operation === 'getMediaInfo') {
 						const mediaId = this.getNodeParameter('mediaId', i) as string;
 						responseData = await client.getMediaInfo(mediaId);
 					} else if (operation === 'likeMedia') {
 						const mediaId = this.getNodeParameter('mediaId', i) as string;
-						responseData = await client.likeMedia(mediaId);
+						await client.likeMedia(mediaId);
+						responseData = { success: true };
 					} else if (operation === 'unlikeMedia') {
 						const mediaId = this.getNodeParameter('mediaId', i) as string;
-						responseData = await client.unlikeMedia(mediaId);
+						await client.unlikeMedia(mediaId);
+						responseData = { success: true };
 					}
 				} else if (resource === 'feed') {
 					if (operation === 'getTimelineFeed') {
-						const limit = this.getNodeParameter('limit', i, 20) as number;
-						responseData = await client.getTimelineFeed(limit);
+						const maxId = this.getNodeParameter('maxId', i, undefined) as string | undefined;
+						responseData = await client.getTimelineFeed(maxId);
 					}
 				}
 
@@ -300,9 +311,10 @@ export class Instagram implements INodeType {
 
 				returnData.push(...executionData);
 			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : String(error);
 				if (this.continueOnFail()) {
 					const executionErrorData = this.helpers.constructExecutionMetaData(
-						this.helpers.returnJsonArray({ error: error.message }),
+						this.helpers.returnJsonArray({ error: errorMessage }),
 						{ itemData: { item: i } }
 					);
 					returnData.push(...executionErrorData);

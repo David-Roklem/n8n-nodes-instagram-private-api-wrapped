@@ -1,6 +1,118 @@
 export interface IInstagramCredentials {
+  username: string;
+  password: string;
+  proxyUrl?: string;
+}
+
+// Interfaces for n8n node compatibility
+export interface IInstagramUserInfo {
+	id: string;
 	username: string;
-	password: string;
+	full_name: string;
+	profile_pic_url: string;
+	is_verified: boolean;
+	follower_count: number;
+	following_count: number;
+	media_count: number;
+	biography: string;
+}
+
+export interface IInstagramUser {
+	pk: string;
+	username: string;
+	full_name: string;
+	profile_pic_url: string;
+	is_verified: boolean;
+	follower_count: number;
+	following_count: number;
+	media_count: number;
+	biography: string;
+	is_private: boolean;
+}
+
+export interface IInstagramTimelineFeed {
+	items: IInstagramMediaItem[];
+	more_available: boolean;
+	next_max_id?: string;
+}
+
+export interface IInstagramUserFeed {
+	items: IInstagramMediaItem[];
+	more_available: boolean;
+	next_max_id?: string;
+}
+
+export interface IInstagramMediaInfo {
+	id: string;
+	code: string;
+	taken_at: number;
+	media_type: number;
+	like_count: number;
+	comment_count: number;
+	user: {
+		pk: string;
+		username: string;
+		full_name: string;
+	};
+	image_versions2?: {
+		candidates: Array<{
+			url: string;
+			width: number;
+			height: number;
+		}>;
+	};
+	video_versions?: Array<{
+		url: string;
+		width: number;
+		height: number;
+	}>;
+}
+
+export interface IInstagramComment {
+	pk: string;
+	text: string;
+	created_at: number;
+	user: {
+		pk: string;
+		username: string;
+		full_name: string;
+		profile_pic_url: string;
+	};
+}
+
+export interface IInstagramDirectThread {
+	thread_id: string;
+	thread_title: string;
+	users: Array<{
+		pk: string;
+		username: string;
+		full_name: string;
+		profile_pic_url: string;
+	}>;
+}
+
+export interface IInstagramDirectMessage {
+	id: string;
+	text: string;
+	timestamp: number;
+	user_id: string;
+}
+
+export interface IInstagramMediaItem {
+	id: string;
+	code: string;
+	taken_at: number;
+	media_type: number; // 1 for photo, 8 for video
+	caption?: {
+		text: string;
+	} | null;
+	like_count: number;
+	comment_count: number;
+	user: {
+		id: string;
+		username: string;
+		full_name: string;
+	};
 }
 
 export interface InstagramPost {
