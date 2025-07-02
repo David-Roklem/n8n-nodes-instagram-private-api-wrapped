@@ -1,0 +1,41 @@
+{
+  "extends": ["@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "n8n-nodes-base"],
+  "rules": {
+    "n8n-nodes-base/node-class-description-display-name-unsuffixed": "error",
+    "n8n-nodes-base/node-class-description-name-unsuffixed": "error",
+    "n8n-nodes-base/node-filename-against-convention": "error",
+    "n8n-nodes-base/node-param-default-missing": "error",
+    "n8n-nodes-base/node-param-description-boolean-without-whether": "error",
+    "n8n-nodes-base/node-param-description-excess-inner-whitespace": "error",
+    "n8n-nodes-base/node-param-description-identical-to-display-name": "error",
+    "n8n-nodes-base/node-param-description-line-break-html-tag": "error",
+    "n8n-nodes-base/node-param-description-miscased-id": "error",
+    "n8n-nodes-base/node-param-description-miscased-json": "error",
+    "n8n-nodes-base/node-param-description-miscased-url": "error",
+    "n8n-nodes-base/node-param-description-missing-final-period": "error",
+    "n8n-nodes-base/node-param-description-missing-for-ignore-ssl-issues": "error",
+    "n8n-nodes-base/node-param-description-missing-for-return-all": "error",
+    "n8n-nodes-base/node-param-description-missing-for-simplify": "error",
+    "n8n-nodes-base/node-param-description-unneeded-backticks": "error",
+    "n8n-nodes-base/node-param-description-untrimmed": "error",
+    "n8n-nodes-base/node-param-description-url-missing-protocol": "error",
+    "n8n-nodes-base/node-param-display-name-excess-inner-whitespace": "error",
+    "n8n-nodes-base/node-param-display-name-miscased": "error",
+    "n8n-nodes-base/node-param-display-name-miscased-id": "error",
+    "n8n-nodes-base/node-param-display-name-not-first-position": "error",
+    "n8n-nodes-base/node-param-display-name-untrimmed": "error",
+    "n8n-nodes-base/node-param-display-name-wrong-for-dynamic-multi-options": "error",
+    "n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options": "error",
+    "n8n-nodes-base/node-param-display-name-wrong-for-simplify": "error",
+    "n8n-nodes-base/node-param-display-name-wrong-for-update-fields": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**"]
+}

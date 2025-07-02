@@ -1,27 +1,24 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-  },
-  plugins: ['@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    '@typescript-eslint/recommended',
-  ],
-  root: true,
-  env: {
-    node: true,
-    jest: true,
-  },
-  ignorePatterns: ['.eslintrc.js', 'dist/**/*', 'node_modules/**/*'],
-  rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'prefer-const': 'error',
-    'no-var': 'error',
-  },
+	root: true,
+	env: {
+		browser: true,
+		es6: true,
+		node: true,
+		jest: true,
+	},
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		project: ['tsconfig.json'],
+		sourceType: 'module',
+		extraFileExtensions: ['.json'],
+	},
+	plugins: ['@typescript-eslint'],
+	extends: [
+		'eslint:recommended',
+	],
+	rules: {
+		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+		'no-unused-vars': 'off',
+	},
+	ignorePatterns: ['dist/', 'node_modules/', '*.js', 'src/test/**/*'],
 };

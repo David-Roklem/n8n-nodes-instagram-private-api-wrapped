@@ -1,355 +1,317 @@
 import {
-  IExecuteFunctions,
-  INodeExecutionData,
-  INodeType,
-  INodeTypeDescription,
-  NodeOperationError,
-  NodeConnectionType,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	NodeOperationError,
+	NodeConnectionType,
 } from 'n8n-workflow';
 
 import { InstagramClient } from '../lib/client';
+import { IInstagramCredentials, IInstagramUserInfo, IInstagramMediaItem } from '../lib/types';
 
 export class Instagram implements INodeType {
-  description: INodeTypeDescription = {
-    displayName: 'Instagram',
-    name: 'instagram',
-    icon: 'fa:instagram',
-    group: ['social media'],
-    version: 1,
-    subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-    description: 'Interact with Instagram using private API',
-    defaults: {
-      name: 'Instagram',
-    },
-    inputs: [NodeConnectionType.Main],
-    outputs: [NodeConnectionType.Main],
-    credentials: [
-      {
-        name: 'instagramApi',
-        required: true,
-      },
-    ],
-    properties: [
-      {
-        displayName: 'Resource',
-        name: 'resource',
-        type: 'options',
-        noDataExpression: true,
-        options: [
-          {
-            name: 'Post',
-            value: 'post',
-          },
-          {
-            name: 'User',
-            value: 'user',
-          },
-          {
-            name: 'Media',
-            value: 'media',
-          },
-        ],
-        default: 'post',
-      },
-      {
-        displayName: 'Operation',
-        name: 'operation',
-        type: 'options',
-        noDataExpression: true,
-        displayOptions: {
-          show: {
-            resource: ['post'],
-          },
-        },
-        options: [
-          {
-            name: 'Post Image',
-            value: 'postImage',
-            description: 'Post an image to Instagram',
-            action: 'Post an image',
-          },
-          {
-            name: 'Like Post',
-            value: 'likePost',
-            description: 'Like a post',
-            action: 'Like a post',
-          },
-          {
-            name: 'Comment on Post',
-            value: 'commentPost',
-            description: 'Comment on a post',
-            action: 'Comment on a post',
-          },
-          {
-            name: 'Get Posts by Hashtag',
-            value: 'getPostsByHashtag',
-            description: 'Get posts by hashtag',
-            action: 'Get posts by hashtag',
-          },
-        ],
-        default: 'postImage',
-      },
-      {
-        displayName: 'Operation',
-        name: 'operation',
-        type: 'options',
-        noDataExpression: true,
-        displayOptions: {
-          show: {
-            resource: ['user'],
-          },
-        },
-        options: [
-          {
-            name: 'Get Followers',
-            value: 'getFollowers',
-            description: 'Get followers of a user',
-            action: 'Get followers',
-          },
-          {
-            name: 'Get Following',
-            value: 'getFollowing',
-            description: 'Get following list of a user',
-            action: 'Get following',
-          },
-          {
-            name: 'Get User Info',
-            value: 'getUserInfo',
-            description: 'Get user information',
-            action: 'Get user info',
-          },
-        ],
-        default: 'getFollowers',
-      },
-      {
-        displayName: 'Image Buffer',
-        name: 'imageBuffer',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['postImage'],
-          },
-        },
-        default: '',
-        placeholder: 'Binary data or base64 encoded image',
-        description: 'The image data to post',
-      },
-      {
-        displayName: 'Caption',
-        name: 'caption',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['postImage'],
-          },
-        },
-        default: '',
-        placeholder: 'Image caption',
-        description: 'Caption for the image post',
-      },
-      {
-        displayName: 'User ID',
-        name: 'userId',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['getFollowers', 'getFollowing'],
-          },
-        },
-        default: '',
-        placeholder: '12345678',
-        description: 'Instagram user ID',
-      },
-      {
-        displayName: 'Username',
-        name: 'username',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['getUserInfo'],
-          },
-        },
-        default: '',
-        placeholder: 'instagram_username',
-        description: 'Instagram username',
-      },
-      {
-        displayName: 'Media ID',
-        name: 'mediaId',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['likePost', 'commentPost'],
-          },
-        },
-        default: '',
-        placeholder: '12345678901234567_12345678',
-        description: 'Instagram media ID',
-      },
-      {
-        displayName: 'Comment',
-        name: 'comment',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['commentPost'],
-          },
-        },
-        default: '',
-        placeholder: 'Your comment here',
-        description: 'Comment text',
-      },
-      {
-        displayName: 'Hashtag',
-        name: 'hashtag',
-        type: 'string',
-        displayOptions: {
-          show: {
-            operation: ['getPostsByHashtag'],
-          },
-        },
-        default: '',
-        placeholder: 'nature',
-        description: 'Hashtag to search for (without #)',
-      },
-      {
-        displayName: 'Limit',
-        name: 'limit',
-        type: 'number',
-        displayOptions: {
-          show: {
-            operation: ['getPostsByHashtag', 'getFollowers', 'getFollowing'],
-          },
-        },
-        default: 10,
-        description: 'Number of results to return',
-      },
-    ],
-  };
+	description: INodeTypeDescription = {
+		displayName: 'Instagram Private API',
+		name: 'instagram',
+		icon: 'file:instagram.svg',
+		group: ['social'],
+		version: 1,
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		description: 'Interact with Instagram using private API methods',
+		defaults: {
+			name: 'Instagram Private API',
+		},
+		inputs: [NodeConnectionType.Main],
+		outputs: [NodeConnectionType.Main],
+		credentials: [
+			{
+				name: 'instagramApi',
+				required: true,
+			},
+		],
+		properties: [
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'User',
+						value: 'user',
+					},
+					{
+						name: 'Media',
+						value: 'media',
+					},
+					{
+						name: 'Feed',
+						value: 'feed',
+					},
+				],
+				default: 'user',
+			},
+			// User Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['user'],
+					},
+				},
+				options: [
+					{
+						name: 'Get Profile Info',
+						value: 'getUserInfo',
+						description: 'Get user profile information',
+						action: 'Get user profile information',
+					},
+					{
+						name: 'Search Users',
+						value: 'searchUsers',
+						description: 'Search for users by username',
+						action: 'Search for users by username',
+					},
+					{
+						name: 'Get Followers',
+						value: 'getFollowers',
+						description: 'Get user followers',
+						action: 'Get user followers',
+					},
+					{
+						name: 'Get Following',
+						value: 'getFollowing',
+						description: 'Get users that a user is following',
+						action: 'Get users that a user is following',
+					},
+				],
+				default: 'getUserInfo',
+			},
+			// Media Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['media'],
+					},
+				},
+				options: [
+					{
+						name: 'Get User Media',
+						value: 'getUserMedia',
+						description: 'Get media posts from a user',
+						action: 'Get media posts from a user',
+					},
+					{
+						name: 'Get Media Info',
+						value: 'getMediaInfo',
+						description: 'Get detailed information about a media item',
+						action: 'Get detailed information about a media item',
+					},
+					{
+						name: 'Like Media',
+						value: 'likeMedia',
+						description: 'Like a media post',
+						action: 'Like a media post',
+					},
+					{
+						name: 'Unlike Media',
+						value: 'unlikeMedia',
+						description: 'Unlike a media post',
+						action: 'Unlike a media post',
+					},
+				],
+				default: 'getUserMedia',
+			},
+			// Feed Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['feed'],
+					},
+				},
+				options: [
+					{
+						name: 'Get Timeline Feed',
+						value: 'getTimelineFeed',
+						description: 'Get posts from timeline feed',
+						action: 'Get posts from timeline feed',
+					},
+				],
+				default: 'getTimelineFeed',
+			},
+			// Common Parameters
+			{
+				displayName: 'Username',
+				name: 'username',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['user'],
+						operation: ['getUserInfo', 'getFollowers', 'getFollowing'],
+					},
+				},
+				default: '',
+				description: 'Instagram username (without @)',
+				required: true,
+			},
+			{
+				displayName: 'Username',
+				name: 'username',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['media'],
+						operation: ['getUserMedia'],
+					},
+				},
+				default: '',
+				description: 'Instagram username (without @)',
+				required: true,
+			},
+			{
+				displayName: 'Search Query',
+				name: 'query',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['user'],
+						operation: ['searchUsers'],
+					},
+				},
+				default: '',
+				description: 'Search term for finding users',
+				required: true,
+			},
+			{
+				displayName: 'Media ID',
+				name: 'mediaId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['media'],
+						operation: ['getMediaInfo', 'likeMedia', 'unlikeMedia'],
+					},
+				},
+				default: '',
+				description: 'Instagram media ID',
+				required: true,
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['media', 'user', 'feed'],
+						operation: ['getUserMedia', 'getFollowers', 'getFollowing', 'getTimelineFeed'],
+					},
+				},
+				typeOptions: {
+					minValue: 1,
+					maxValue: 100,
+				},
+				default: 20,
+				description: 'Maximum number of items to return',
+			},
+		],
+	};
 
-  async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-    const items = this.getInputData();
-    const returnData: INodeExecutionData[] = [];
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const items = this.getInputData();
+		const returnData: INodeExecutionData[] = [];
 
-    const credentials = await this.getCredentials('instagramApi');
-    const client = new InstagramClient();
+		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0) as string;
 
-    try {
-      await client.login(credentials.username as string, credentials.password as string);
+		// Get credentials
+		const credentials = await this.getCredentials('instagramApi') as IInstagramCredentials;
 
-      for (let i = 0; i < items.length; i++) {
-        const resource = this.getNodeParameter('resource', i) as string;
-        const operation = this.getNodeParameter('operation', i) as string;
+		// Initialize Instagram client
+		const client = new InstagramClient(credentials);
 
-        let responseData: any;
+		for (let i = 0; i < items.length; i++) {
+			try {
+				let responseData: any;
 
-        try {
-          if (resource === 'post') {
-            if (operation === 'postImage') {
-              responseData = await handlePostImage.call(this, client, i);
-            } else if (operation === 'likePost') {
-              responseData = await handleLikePost.call(this, client, i);
-            } else if (operation === 'commentPost') {
-              responseData = await handleCommentPost.call(this, client, i);
-            } else if (operation === 'getPostsByHashtag') {
-              responseData = await handleGetPostsByHashtag.call(this, client, i);
-            }
-          } else if (resource === 'user') {
-            if (operation === 'getFollowers') {
-              responseData = await handleGetFollowers.call(this, client, i);
-            } else if (operation === 'getFollowing') {
-              responseData = await handleGetFollowing.call(this, client, i);
-            } else if (operation === 'getUserInfo') {
-              responseData = await handleGetUserInfo.call(this, client, i);
-            }
-          }
+				if (resource === 'user') {
+					if (operation === 'getUserInfo') {
+						const username = this.getNodeParameter('username', i) as string;
+						responseData = await client.getUserInfo(username);
+					} else if (operation === 'searchUsers') {
+						const query = this.getNodeParameter('query', i) as string;
+						responseData = await client.searchUsers(query);
+					} else if (operation === 'getFollowers') {
+						const username = this.getNodeParameter('username', i) as string;
+						const limit = this.getNodeParameter('limit', i, 20) as number;
+						responseData = await client.getFollowers(username, limit);
+					} else if (operation === 'getFollowing') {
+						const username = this.getNodeParameter('username', i) as string;
+						const limit = this.getNodeParameter('limit', i, 20) as number;
+						responseData = await client.getFollowing(username, limit);
+					}
+				} else if (resource === 'media') {
+					if (operation === 'getUserMedia') {
+						const username = this.getNodeParameter('username', i) as string;
+						const limit = this.getNodeParameter('limit', i, 20) as number;
+						responseData = await client.getUserMedia(username, limit);
+					} else if (operation === 'getMediaInfo') {
+						const mediaId = this.getNodeParameter('mediaId', i) as string;
+						responseData = await client.getMediaInfo(mediaId);
+					} else if (operation === 'likeMedia') {
+						const mediaId = this.getNodeParameter('mediaId', i) as string;
+						responseData = await client.likeMedia(mediaId);
+					} else if (operation === 'unlikeMedia') {
+						const mediaId = this.getNodeParameter('mediaId', i) as string;
+						responseData = await client.unlikeMedia(mediaId);
+					}
+				} else if (resource === 'feed') {
+					if (operation === 'getTimelineFeed') {
+						const limit = this.getNodeParameter('limit', i, 20) as number;
+						responseData = await client.getTimelineFeed(limit);
+					}
+				}
 
-          const executionData = this.helpers.constructExecutionMetaData(
-            this.helpers.returnJsonArray(responseData),
-            { itemData: { item: i } },
-          );
+				if (responseData === undefined) {
+					throw new NodeOperationError(
+						this.getNode(),
+						`The operation "${operation}" is not supported for resource "${resource}"`,
+						{ itemIndex: i }
+					);
+				}
 
-          returnData.push(...executionData);
-        } catch (error) {
-          if (this.continueOnFail()) {
-            returnData.push({
-              json: {
-                error: (error as Error).message,
-              },
-              pairedItem: {
-                item: i,
-              },
-            });
-            continue;
-          }
-          throw error;
-        }
-      }
+				const executionData = this.helpers.constructExecutionMetaData(
+					this.helpers.returnJsonArray(responseData),
+					{
+						itemData: { item: i },
+					}
+				);
 
-      return [returnData];
-    } catch (error) {
-      throw new NodeOperationError(this.getNode(), `Instagram operation failed: ${(error as Error).message}`);
-    }
-  }
-}
+				returnData.push(...executionData);
+			} catch (error) {
+				if (this.continueOnFail()) {
+					const executionErrorData = this.helpers.constructExecutionMetaData(
+						this.helpers.returnJsonArray({ error: error.message }),
+						{ itemData: { item: i } }
+					);
+					returnData.push(...executionErrorData);
+					continue;
+				}
+				throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
+			}
+		}
 
-async function handlePostImage(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const imageData = this.getNodeParameter('imageBuffer', itemIndex) as string;
-  const caption = this.getNodeParameter('caption', itemIndex, '') as string;
-
-  if (!imageData) {
-    throw new NodeOperationError(this.getNode(), 'Image data is required');
-  }
-
-  let imageBuffer: Buffer;
-
-  // Handle different image data formats
-  if (imageData.startsWith('data:image/')) {
-    // Base64 data URL
-    const base64Data = imageData.split(',')[1];
-    imageBuffer = Buffer.from(base64Data, 'base64');
-  } else if (this.helpers.getBinaryDataBuffer) {
-    // Binary data
-    const binaryData = await this.helpers.getBinaryDataBuffer(itemIndex, 'data');
-    imageBuffer = binaryData;
-  } else {
-    // Assume it's base64 encoded
-    imageBuffer = Buffer.from(imageData, 'base64');
-  }
-
-  return await client.postImage(imageBuffer, caption);
-}
-
-async function handleGetFollowers(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const userId = this.getNodeParameter('userId', itemIndex, '') as string;
-  const limit = this.getNodeParameter('limit', itemIndex, 10) as number;
-  return await client.getFollowers(userId, limit);
-}
-
-async function handleGetFollowing(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const userId = this.getNodeParameter('userId', itemIndex, '') as string;
-  const limit = this.getNodeParameter('limit', itemIndex, 10) as number;
-  return await client.getFollowing(userId, limit);
-}
-
-async function handleLikePost(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const mediaId = this.getNodeParameter('mediaId', itemIndex) as string;
-  return await client.likePost(mediaId);
-}
-
-async function handleCommentPost(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const mediaId = this.getNodeParameter('mediaId', itemIndex) as string;
-  const comment = this.getNodeParameter('comment', itemIndex) as string;
-  return await client.commentOnPost(mediaId, comment);
-}
-
-async function handleGetUserInfo(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const username = this.getNodeParameter('username', itemIndex) as string;
-  return await client.getUserInfo(username);
-}
-
-async function handleGetPostsByHashtag(this: IExecuteFunctions, client: InstagramClient, itemIndex: number): Promise<any> {
-  const hashtag = this.getNodeParameter('hashtag', itemIndex) as string;
-  const limit = this.getNodeParameter('limit', itemIndex, 10) as number;
-  return await client.getPostsByHashtag(hashtag, limit);
+		return [returnData];
+	}
 }

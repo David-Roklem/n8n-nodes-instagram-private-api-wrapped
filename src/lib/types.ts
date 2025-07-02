@@ -1,11 +1,71 @@
-export interface InstagramCredentials {
-  username: string;
-  password: string;
+export interface IInstagramCredentials {
+	username: string;
+	password: string;
 }
 
-export interface PostImageOptions {
-  imageBuffer: Buffer;
-  caption?: string;
+export interface InstagramPost {
+	id: string;
+	shortcode: string;
+	caption?: string;
+	media_type: number;
+	image_versions2?: {
+		candidates: Array<{
+			url: string;
+			width: number;
+			height: number;
+		}>;
+	};
+	video_versions?: Array<{
+		url: string;
+		width: number;
+		height: number;
+	}>;
+	like_count: number;
+	comment_count: number;
+	taken_at: number;
+	user: {
+		pk: string;
+		username: string;
+		full_name: string;
+		profile_pic_url: string;
+	};
+}
+
+export interface InstagramUser {
+	pk: string;
+	username: string;
+	full_name: string;
+	biography?: string;
+	profile_pic_url: string;
+	follower_count: number;
+	following_count: number;
+	media_count: number;
+	is_private: boolean;
+	is_verified: boolean;
+}
+
+export interface InstagramStory {
+	id: string;
+	media_type: number;
+	image_versions2?: {
+		candidates: Array<{
+			url: string;
+			width: number;
+			height: number;
+		}>;
+	};
+	video_versions?: Array<{
+		url: string;
+		width: number;
+		height: number;
+	}>;
+	taken_at: number;
+	expiring_at: number;
+	user: {
+		pk: string;
+		username: string;
+		profile_pic_url: string;
+	};
 }
 
 export interface UserInfo {
@@ -24,8 +84,7 @@ export interface MediaItem {
   id: string;
   code: string;
   taken_at: number;
-  media_type: number;
-  image_versions2?: any;
+  media_type: number; // 1 for photo, 8 for video
   caption?: {
     text: string;
   };
@@ -46,6 +105,35 @@ export interface CommentInfo {
     id: string;
     username: string;
   };
+}
+
+export interface PostImageOptions {
+  caption?: string;
+  location?: {
+    name: string;
+    lat?: number;
+    lng?: number;
+  };
+}
+
+export interface FollowUserResult {
+  success: boolean;
+  user_id: string;
+}
+
+export interface UnfollowUserResult {
+  success: boolean;
+  user_id: string;
+}
+
+export interface LikePostResult {
+  success: boolean;
+  media_id: string;
+}
+
+export interface HashtagInfo {
+  name: string;
+  media_count: number;
 }
 
 export interface InstagramNodeProperties {
