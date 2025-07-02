@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-instagram-private-api-wrapped",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "n8n community node for Instagram automation using private API capabilities",
   "license": "MIT",
   "homepage": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api",
@@ -46,7 +46,8 @@
     "node": ">=18.17"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "cp -r src/nodes/*.svg dist/nodes/ 2>/dev/null || true",
     "dev": "tsc --watch",
     "format": "prettier src --write",
     "lint": "eslint src/**/*.ts --max-warnings 3",
