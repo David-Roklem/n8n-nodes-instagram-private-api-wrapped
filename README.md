@@ -25,13 +25,13 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 # Latest version (recommended)
 npm install n8n-nodes-instagram-private-api-wrapped@latest
 
-# Specific version 0.0.6 (with credential fixes)
-npm install n8n-nodes-instagram-private-api-wrapped@0.0.6
+# Specific version 0.0.8 (latest stable)
+npm install n8n-nodes-instagram-private-api-wrapped@0.0.8
 ```
 
 ### 🔄 **Updating from Previous Versions**
 
-If upgrading from v0.0.5 or earlier:
+If upgrading from v0.0.7 or earlier:
 
 ```bash
 # Uninstall old version
@@ -44,7 +44,7 @@ npm install n8n-nodes-instagram-private-api-wrapped@latest
 npm run start
 ```
 
-**Note**: You may need to recreate your credentials after updating to v0.0.6 due to credential name changes.
+**Note**: You may need to recreate your credentials after updating to v0.0.6+ due to credential name changes.
 
 ## Operations
 
@@ -72,8 +72,22 @@ This node requires Instagram login credentials configured through n8n's credenti
 - **Username**: Your Instagram username or email
 - **Password**: Your Instagram password  
 - **Proxy URL** (Optional): HTTP proxy URL for requests
+- **Session Data** (Optional): Pre-saved session data to avoid repeated logins
 
 > **🚨 Important**: Starting from v0.0.6, credentials are named **"Instagram API"** (previously "Instagram Credentials"). You may need to recreate your credentials after updating.
+
+### 🔄 **Alternative Authentication: Session Data**
+
+If you're experiencing login blocks or challenges, you can use session data for persistent authentication:
+
+1. **Obtain Session Data**: Use a separate Instagram private API script to login and extract session data
+2. **Save Session Data**: Paste the session JSON into the "Session Data" field in your credentials
+3. **Leave Username/Password**: Keep them filled as fallback, but the node will prioritize session data
+
+**Benefits of Session Data:**
+- Avoids repeated login attempts that trigger Instagram's bot detection
+- Maintains persistent authentication across workflow runs
+- Reduces risk of account suspension due to automation detection
 
 ### 🔒 **Security Considerations**
 - Uses n8n's secure credential storage system
@@ -146,12 +160,14 @@ This node leverages the powerful `instagram-private-api` library to provide acce
 
 For detailed authentication troubleshooting, see [AUTHENTICATION_GUIDE.md](./AUTHENTICATION_GUIDE.md).
 
-**Quick fixes for "400 Bad Request" errors:**
+**Quick fixes for "400 Bad Request" or "Challenge Required" errors:**
 
-1. **Log into Instagram app first** and complete any verification challenges
-2. **Use a dedicated account** (not your personal account) for automation
-3. **Disable 2FA temporarily** during initial setup
-4. **Wait between retry attempts** - Instagram heavily rate limits
+1. **Try Session Data Method**: Extract session data using the script above and use it instead of direct login
+2. **Log into Instagram app first** and complete any verification challenges
+3. **Use a dedicated account** (not your personal account) for automation
+4. **Disable 2FA temporarily** during initial setup
+5. **Wait between retry attempts** - Instagram heavily rate limits
+6. **Use a proxy** if you're making many requests from the same IP
 
 ### 🔧 **Credential Issues**
 
@@ -169,12 +185,42 @@ If you see **"Node does not have any credentials set"**:
 ### 📊 **Credential Configuration**
 
 ```json
-// Credential Configuration
+// Basic Credential Configuration
 {
   "username": "your_instagram_username",
   "password": "your_secure_password", 
   "proxyUrl": "http://proxy.example.com:8080" // Optional
 }
+
+// Advanced Configuration with Session Data
+{
+  "username": "your_instagram_username",
+  "password": "your_secure_password",
+  "proxyUrl": "http://proxy.example.com:8080", // Optional
+  "sessionData": "{\"cookies\":[...],\"sessionId\":\"...\"}" // Optional - for persistent auth
+}
+```
+
+### 💡 **Getting Session Data**
+
+If you need to extract session data for persistent authentication:
+
+```javascript
+// Example script to get session data (run outside n8n)
+const { IgApiClient } = require('instagram-private-api');
+
+async function getSessionData() {
+  const ig = new IgApiClient();
+  ig.state.generateDevice('your_username');
+  
+  await ig.account.login('your_username', 'your_password');
+  
+  // Save this session data
+  const sessionData = await ig.state.serialize();
+  console.log('Session Data:', JSON.stringify(sessionData));
+}
+
+getSessionData();
 ```
 
 ### 🐛 **Error Handling**
@@ -192,7 +238,17 @@ If you see **"Node does not have any credentials set"**:
 
 ## Version History
 
-* **0.0.7** (Current):
+* **0.0.8** (Current):
+  - 📦 **PRODUCTION OPTIMIZATION**: Enhanced package stability and documentation
+  - ✅ Updated package.json configuration for better npm compatibility
+  - ✅ Improved dependency management and peer dependencies
+  - ✅ Enhanced documentation with session data authentication guide
+  - ✅ Optimized build process and asset handling
+  - ✅ Comprehensive troubleshooting documentation
+  - ✅ Final validation and testing of all components
+  - ✅ Production-ready release with improved reliability
+
+* **0.0.7**:
   - 🚀 **MAJOR AUTHENTICATION IMPROVEMENTS**: Enhanced Instagram login reliability
   - ✅ Added pre/post login flow simulation for better bot detection avoidance
   - ✅ Implemented retry authentication with exponential backoff

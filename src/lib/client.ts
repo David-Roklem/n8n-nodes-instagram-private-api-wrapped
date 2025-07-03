@@ -35,36 +35,61 @@ export class InstagramClient {
         this.client.state.proxyUrl = credentials.proxyUrl;
       }
       
-      // Pre-login flow simulation
+      // Add more realistic delays and behavior
+      console.log('Starting Instagram authentication...');
+      
+      // Pre-login flow simulation with delays
+      console.log('Simulating pre-login flow...');
       await this.client.simulate.preLoginFlow();
       
-      // Attempt login
+      // Add delay before login attempt (simulate human reading time)
+      await this.delay(2000 + Math.random() * 3000); // 2-5 seconds
+      
+      // Attempt login with more human-like behavior
+      console.log('Attempting login...');
       const loginResult = await this.client.account.login(credentials.username, credentials.password);
       
+      // Add delay after successful login
+      await this.delay(1000 + Math.random() * 2000); // 1-3 seconds
+      
       // Post-login flow simulation
+      console.log('Simulating post-login flow...');
       await this.client.simulate.postLoginFlow();
       
+      console.log('Authentication successful');
       this.isAuthenticated = true;
+      
     } catch (error) {
       this.isAuthenticated = false;
       
+      console.log('Authentication failed:', error);
+      
       // Enhanced error handling
       if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+        
         // Check for specific Instagram errors
-        if (error.message.includes('challenge_required')) {
-          throw new Error(`Authentication failed: Instagram requires verification. Please log in through the app first and complete any security challenges.`);
-        } else if (error.message.includes('checkpoint_required')) {
-          throw new Error(`Authentication failed: Instagram checkpoint required. Please verify your account through the official app.`);
-        } else if (error.message.includes('Please wait')) {
-          throw new Error(`Authentication failed: Rate limited. Please wait before trying again.`);
-        } else if (error.message.includes('400')) {
-          throw new Error(`Authentication failed: Invalid credentials or Instagram detected automated access. Try using the official app first.`);
+        if (errorMessage.includes('challenge_required')) {
+          throw new Error(`Authentication failed: Instagram requires verification. Please log in through the mobile app first and complete any security challenges, then try again.`);
+        } else if (errorMessage.includes('checkpoint_required')) {
+          throw new Error(`Authentication failed: Instagram checkpoint required. Please verify your account through the official mobile app and complete any required steps.`);
+        } else if (errorMessage.includes('429') || errorMessage.includes('too many requests')) {
+          throw new Error(`Authentication failed: Rate limited by Instagram. Please wait at least 30 minutes before trying again. Consider using the app manually first.`);
+        } else if (errorMessage.includes('400') || errorMessage.includes('bad request')) {
+          throw new Error(`Authentication failed: Invalid credentials or Instagram detected automated access. Please: 1) Verify your username/password, 2) Log in through the official app first, 3) Wait 30+ minutes between attempts.`);
+        } else if (errorMessage.includes('login_required')) {
+          throw new Error(`Authentication failed: Login session expired. Please try authenticating again.`);
         }
         throw new Error(`Authentication failed: ${error.message}`);
       }
       
       throw new Error(`Authentication failed: Unknown error occurred`);
     }
+  }
+
+  // Helper method for realistic delays
+  private async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async authenticateWithRetry(credentials: IInstagramCredentials, maxRetries: number = 3): Promise<void> {

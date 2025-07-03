@@ -9,7 +9,7 @@ import {
 export class InstagramCredentials implements ICredentialType {
 	name = 'instagramApi';
 	displayName = 'Instagram API';
-	documentationUrl = 'https://github.com/tiagohintz/n8n-nodes-instagram-private-api';
+	documentationUrl = 'https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Username',
@@ -35,7 +35,6 @@ export class InstagramCredentials implements ICredentialType {
 			name: 'proxyUrl',
 			type: 'string',
 			default: '',
-			required: false,
 			description: 'Optional HTTP proxy URL for requests',
 			placeholder: 'http://proxy.example.com:8080',
 		},
@@ -47,7 +46,6 @@ export class InstagramCredentials implements ICredentialType {
 				password: true,
 			},
 			default: '',
-			required: false,
 			description: 'Optional: Saved session data to avoid repeated logins (advanced users only)',
 			placeholder: 'Leave empty for normal username/password authentication',
 		},
@@ -63,7 +61,8 @@ export class InstagramCredentials implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://www.instagram.com',
-			url: '/accounts/login/',
+			url: '/',
+			method: 'GET',
 		},
 	};
 }
