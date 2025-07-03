@@ -1,19 +1,19 @@
 {
-  "name": "n8n-nodes-instagram-private-api-wrapped",
+  "name": "n8n-nodes-instagram-private-api-wrapped-logo-changed",
   "version": "0.0.10",
   "description": "n8n community node for Instagram automation using private API capabilities",
   "license": "MIT",
-  "homepage": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped",
+  "homepage": "https://github.com/David-Roklem/n8n-nodes-instagram-private-api-wrapped-logo-changed",
   "author": {
     "name": "tiagohintz",
     "email": "tiagohintz@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped.git"
+    "url": "https://github.com/David-Roklem/n8n-nodes-instagram-private-api-wrapped-logo-changed.git"
   },
   "bugs": {
-    "url": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped/issues"
+    "url": "https://github.com/David-Roklem/n8n-nodes-instagram-private-api-wrapped-logo-changed/issues"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
