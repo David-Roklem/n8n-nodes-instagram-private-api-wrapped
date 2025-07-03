@@ -35,10 +35,37 @@ export class InstagramClient {
         this.client.state.proxyUrl = credentials.proxyUrl;
       }
       
-      // Add more realistic delays and behavior
       console.log('Starting Instagram authentication...');
       
-      // Pre-login flow simulation with delays
+      // Try session data first if available
+      if (credentials.sessionData) {
+        console.log('🔄 Using session data authentication...');
+        try {
+          // Parse and load session data
+          const sessionData = typeof credentials.sessionData === 'string' 
+            ? JSON.parse(credentials.sessionData) 
+            : credentials.sessionData;
+          
+          await this.client.state.deserialize(sessionData);
+          
+          // Verify session is still valid
+          console.log('🔍 Verifying session validity...');
+          await this.client.user.info(this.client.state.cookieUserId);
+          
+          console.log('✅ Session data authentication successful');
+          this.isAuthenticated = true;
+          return;
+          
+        } catch (sessionError) {
+          console.log('⚠️ Session data invalid or expired, falling back to login...');
+          // Continue to login method below
+        }
+      }
+      
+      // Fallback to username/password login (NOT RECOMMENDED for production)
+      console.log('⚠️ Using username/password login (high risk of blocks)...');
+      
+      // Add more realistic delays and behavior
       console.log('Simulating pre-login flow...');
       await this.client.simulate.preLoginFlow();
       
@@ -56,13 +83,13 @@ export class InstagramClient {
       console.log('Simulating post-login flow...');
       await this.client.simulate.postLoginFlow();
       
-      console.log('Authentication successful');
+      console.log('✅ Username/password authentication successful');
       this.isAuthenticated = true;
       
     } catch (error) {
       this.isAuthenticated = false;
       
-      console.log('Authentication failed:', error);
+      console.log('❌ Authentication failed:', error);
       
       // Enhanced error handling
       if (error instanceof Error) {
@@ -70,20 +97,20 @@ export class InstagramClient {
         
         // Check for specific Instagram errors
         if (errorMessage.includes('challenge_required')) {
-          throw new Error(`Authentication failed: Instagram requires verification. Please log in through the mobile app first and complete any security challenges, then try again.`);
+          throw new Error(`Authentication failed: Instagram requires verification. SOLUTION: 1) Log in through Instagram mobile app, 2) Complete verification challenges, 3) Extract session data using the guide, 4) Use session data instead of direct login.`);
         } else if (errorMessage.includes('checkpoint_required')) {
-          throw new Error(`Authentication failed: Instagram checkpoint required. Please verify your account through the official mobile app and complete any required steps.`);
+          throw new Error(`Authentication failed: Instagram checkpoint required. SOLUTION: 1) Open Instagram mobile app, 2) Complete account verification, 3) Wait 24-48 hours, 4) Extract session data and use instead of direct login.`);
         } else if (errorMessage.includes('429') || errorMessage.includes('too many requests')) {
-          throw new Error(`Authentication failed: Rate limited by Instagram. Please wait at least 30 minutes before trying again. Consider using the app manually first.`);
+          throw new Error(`Authentication failed: Rate limited by Instagram. SOLUTION: 1) STOP all automation for 2-4 hours, 2) Use session data method instead, 3) Implement longer delays between requests.`);
         } else if (errorMessage.includes('400') || errorMessage.includes('bad request')) {
-          throw new Error(`Authentication failed: Invalid credentials or Instagram detected automated access. Please: 1) Verify your username/password, 2) Log in through the official app first, 3) Wait 30+ minutes between attempts.`);
+          throw new Error(`Authentication failed: Instagram detected automated access. CRITICAL: 1) STOP direct login attempts immediately, 2) Use session data method only, 3) Wait 2-4 hours, 4) Login via mobile app first.`);
         } else if (errorMessage.includes('login_required')) {
-          throw new Error(`Authentication failed: Login session expired. Please try authenticating again.`);
+          throw new Error(`Authentication failed: Session expired. SOLUTION: Extract fresh session data using the provided script and update your credentials.`);
         }
-        throw new Error(`Authentication failed: ${error.message}`);
+        throw new Error(`Authentication failed: ${error.message}. RECOMMENDATION: Switch to session data authentication method for better reliability.`);
       }
       
-      throw new Error(`Authentication failed: Unknown error occurred`);
+      throw new Error(`Authentication failed: Unknown error occurred. Try using session data authentication instead.`);
     }
   }
 
