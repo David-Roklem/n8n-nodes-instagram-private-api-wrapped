@@ -18,7 +18,8 @@ export class InstagramClient {
   constructor(credentials?: IInstagramCredentials) {
     this.client = new IgApiClient();
     if (credentials) {
-      this.client.state.generateDevice(credentials.username);
+      // Generate a generic device since we don't have username
+      this.client.state.generateDevice('instagram_user');
       if (credentials.proxyUrl) {
         this.client.state.proxyUrl = credentials.proxyUrl;
       }
@@ -27,64 +28,38 @@ export class InstagramClient {
 
   async authenticate(credentials: IInstagramCredentials): Promise<void> {
     try {
-      // Generate device and set up state
-      this.client.state.generateDevice(credentials.username);
-      
       // Configure proxy if provided
       if (credentials.proxyUrl) {
         this.client.state.proxyUrl = credentials.proxyUrl;
       }
       
-      console.log('Starting Instagram authentication...');
+      console.log('🔄 Starting Instagram session authentication...');
       
-      // Try session data first if available
-      if (credentials.sessionData) {
-        console.log('🔄 Using session data authentication...');
-        try {
-          // Parse and load session data
-          const sessionData = typeof credentials.sessionData === 'string' 
-            ? JSON.parse(credentials.sessionData) 
-            : credentials.sessionData;
-          
-          await this.client.state.deserialize(sessionData);
-          
-          // Verify session is still valid
-          console.log('🔍 Verifying session validity...');
-          await this.client.user.info(this.client.state.cookieUserId);
-          
-          console.log('✅ Session data authentication successful');
-          this.isAuthenticated = true;
-          return;
-          
-        } catch (sessionError) {
-          console.log('⚠️ Session data invalid or expired, falling back to login...');
-          // Continue to login method below
-        }
+      if (!credentials.sessionData) {
+        throw new Error('Session data is required. Please use the extract-session.sh script to obtain session data.');
       }
       
-      // Fallback to username/password login (NOT RECOMMENDED for production)
-      console.log('⚠️ Using username/password login (high risk of blocks)...');
-      
-      // Add more realistic delays and behavior
-      console.log('Simulating pre-login flow...');
-      await this.client.simulate.preLoginFlow();
-      
-      // Add delay before login attempt (simulate human reading time)
-      await this.delay(2000 + Math.random() * 3000); // 2-5 seconds
-      
-      // Attempt login with more human-like behavior
-      console.log('Attempting login...');
-      const loginResult = await this.client.account.login(credentials.username, credentials.password);
-      
-      // Add delay after successful login
-      await this.delay(1000 + Math.random() * 2000); // 1-3 seconds
-      
-      // Post-login flow simulation
-      console.log('Simulating post-login flow...');
-      await this.client.simulate.postLoginFlow();
-      
-      console.log('✅ Username/password authentication successful');
-      this.isAuthenticated = true;
+      try {
+        // Parse and load session data
+        const sessionData = typeof credentials.sessionData === 'string' 
+          ? JSON.parse(credentials.sessionData) 
+          : credentials.sessionData;
+        
+        console.log('📂 Loading session data...');
+        await this.client.state.deserialize(sessionData);
+        
+        // Verify session is still valid
+        console.log('🔍 Verifying session validity...');
+        const userInfo = await this.client.user.info(this.client.state.cookieUserId);
+        
+        console.log(`✅ Session authentication successful for user: ${userInfo.username}`);
+        this.isAuthenticated = true;
+        return;
+        
+      } catch (sessionError) {
+        console.log('❌ Session data error:', sessionError);
+        throw new Error(`Invalid or expired session data. Please extract fresh session data using the extract-session.sh script. Error: ${sessionError instanceof Error ? sessionError.message : 'Unknown error'}`);
+      }
       
     } catch (error) {
       this.isAuthenticated = false;
@@ -96,21 +71,19 @@ export class InstagramClient {
         const errorMessage = error.message.toLowerCase();
         
         // Check for specific Instagram errors
-        if (errorMessage.includes('challenge_required')) {
-          throw new Error(`Authentication failed: Instagram requires verification. SOLUTION: 1) Log in through Instagram mobile app, 2) Complete verification challenges, 3) Extract session data using the guide, 4) Use session data instead of direct login.`);
+        if (errorMessage.includes('login_required') || errorMessage.includes('unauthorized')) {
+          throw new Error(`Session expired or invalid. Please extract fresh session data using the extract-session.sh script and update your credentials.`);
+        } else if (errorMessage.includes('challenge_required')) {
+          throw new Error(`Instagram session requires verification. Please: 1) Login through Instagram mobile app, 2) Complete any verification challenges, 3) Extract fresh session data using extract-session.sh script.`);
         } else if (errorMessage.includes('checkpoint_required')) {
-          throw new Error(`Authentication failed: Instagram checkpoint required. SOLUTION: 1) Open Instagram mobile app, 2) Complete account verification, 3) Wait 24-48 hours, 4) Extract session data and use instead of direct login.`);
+          throw new Error(`Instagram account requires verification. Please: 1) Open Instagram mobile app, 2) Complete account verification, 3) Wait 24-48 hours, 4) Extract fresh session data using extract-session.sh script.`);
         } else if (errorMessage.includes('429') || errorMessage.includes('too many requests')) {
-          throw new Error(`Authentication failed: Rate limited by Instagram. SOLUTION: 1) STOP all automation for 2-4 hours, 2) Use session data method instead, 3) Implement longer delays between requests.`);
-        } else if (errorMessage.includes('400') || errorMessage.includes('bad request')) {
-          throw new Error(`Authentication failed: Instagram detected automated access. CRITICAL: 1) STOP direct login attempts immediately, 2) Use session data method only, 3) Wait 2-4 hours, 4) Login via mobile app first.`);
-        } else if (errorMessage.includes('login_required')) {
-          throw new Error(`Authentication failed: Session expired. SOLUTION: Extract fresh session data using the provided script and update your credentials.`);
+          throw new Error(`Rate limited by Instagram. Please wait 2-4 hours and extract fresh session data using extract-session.sh script.`);
         }
-        throw new Error(`Authentication failed: ${error.message}. RECOMMENDATION: Switch to session data authentication method for better reliability.`);
+        throw error;
       }
       
-      throw new Error(`Authentication failed: Unknown error occurred. Try using session data authentication instead.`);
+      throw new Error(`Authentication failed: Unknown error occurred. Please extract fresh session data using extract-session.sh script.`);
     }
   }
 

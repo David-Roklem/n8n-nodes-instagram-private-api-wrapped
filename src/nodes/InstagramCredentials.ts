@@ -12,23 +12,16 @@ export class InstagramCredentials implements ICredentialType {
 	documentationUrl = 'https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped';
 	properties: INodeProperties[] = [
 		{
-			displayName: 'Username',
-			name: 'username',
-			type: 'string',
-			default: '',
-			required: true,
-			description: 'Your Instagram username or email',
-		},
-		{
-			displayName: 'Password',
-			name: 'password',
+			displayName: 'Session Data',
+			name: 'sessionData',
 			type: 'string',
 			typeOptions: {
 				password: true,
 			},
 			default: '',
 			required: true,
-			description: 'Your Instagram password',
+			description: 'Instagram session data (JSON format). Use the extract-session.sh script to obtain this data.',
+			placeholder: '{"cookies":[...],"sessionId":"..."}',
 		},
 		{
 			displayName: 'Proxy URL',
@@ -37,17 +30,6 @@ export class InstagramCredentials implements ICredentialType {
 			default: '',
 			description: 'Optional HTTP proxy URL for requests',
 			placeholder: 'http://proxy.example.com:8080',
-		},
-		{
-			displayName: 'Session Data',
-			name: 'sessionData',
-			type: 'string',
-			typeOptions: {
-				password: true,
-			},
-			default: '',
-			description: 'Optional: Saved session data to avoid repeated logins (advanced users only)',
-			placeholder: 'Leave empty for normal username/password authentication',
 		},
 	];
 

@@ -4,8 +4,8 @@ import { IInstagramCredentials } from '../lib/types';
 describe('InstagramClient Integration', () => {
   let client: InstagramClient;
   const mockCredentials: IInstagramCredentials = {
-    username: 'testuser',
-    password: 'testpass'
+    sessionData: '{"cookies":[],"sessionId":"test_session"}',
+    proxyUrl: 'http://test-proxy.com:8080'
   };
 
   beforeEach(() => {

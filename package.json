@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-instagram-private-api-wrapped",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "n8n community node for Instagram automation using private API capabilities",
   "license": "MIT",
   "homepage": "https://github.com/tiagohintz/n8n-nodes-instagram-private-api-wrapped",
