@@ -242,7 +242,23 @@ export class Instagram implements INodeType {
 
 		// Initialize Instagram client
 		const client = new InstagramClient(credentials);
-		await client.authenticate(credentials);
+		
+		// Try to use saved session first, then fallback to credentials
+		try {
+			if (credentials.sessionData && credentials.sessionData.trim()) {
+				console.log('Attempting to use saved session...');
+				await client.loadSession(credentials.sessionData);
+			} else {
+				console.log('No session data found, using username/password authentication...');
+				await client.authenticateWithRetry(credentials, 2);
+			}
+		} catch (error) {
+			throw new NodeOperationError(
+				this.getNode(), 
+				`Instagram authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please check your credentials and try again.`,
+				{ itemIndex: 0 }
+			);
+		}
 
 		for (let i = 0; i < items.length; i++) {
 			try {

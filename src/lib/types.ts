@@ -2,6 +2,7 @@ export interface IInstagramCredentials {
   username: string;
   password: string;
   proxyUrl?: string;
+  sessionData?: string;
 }
 
 // Interfaces for n8n node compatibility

@@ -27,17 +27,77 @@ export class InstagramClient {
 
   async authenticate(credentials: IInstagramCredentials): Promise<void> {
     try {
+      // Generate device and set up state
       this.client.state.generateDevice(credentials.username);
+      
+      // Configure proxy if provided
       if (credentials.proxyUrl) {
         this.client.state.proxyUrl = credentials.proxyUrl;
       }
       
-      await this.client.account.login(credentials.username, credentials.password);
+      // Pre-login flow simulation
+      await this.client.simulate.preLoginFlow();
+      
+      // Attempt login
+      const loginResult = await this.client.account.login(credentials.username, credentials.password);
+      
+      // Post-login flow simulation
+      await this.client.simulate.postLoginFlow();
+      
       this.isAuthenticated = true;
     } catch (error) {
       this.isAuthenticated = false;
-      throw new Error(`Authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Enhanced error handling
+      if (error instanceof Error) {
+        // Check for specific Instagram errors
+        if (error.message.includes('challenge_required')) {
+          throw new Error(`Authentication failed: Instagram requires verification. Please log in through the app first and complete any security challenges.`);
+        } else if (error.message.includes('checkpoint_required')) {
+          throw new Error(`Authentication failed: Instagram checkpoint required. Please verify your account through the official app.`);
+        } else if (error.message.includes('Please wait')) {
+          throw new Error(`Authentication failed: Rate limited. Please wait before trying again.`);
+        } else if (error.message.includes('400')) {
+          throw new Error(`Authentication failed: Invalid credentials or Instagram detected automated access. Try using the official app first.`);
+        }
+        throw new Error(`Authentication failed: ${error.message}`);
+      }
+      
+      throw new Error(`Authentication failed: Unknown error occurred`);
     }
+  }
+
+  async authenticateWithRetry(credentials: IInstagramCredentials, maxRetries: number = 3): Promise<void> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Authentication attempt ${attempt}/${maxRetries}`);
+        
+        // Wait between attempts (except first)
+        if (attempt > 1) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        
+        await this.authenticate(credentials);
+        console.log('Authentication successful');
+        return; // Success, exit retry loop
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        console.log(`Authentication attempt ${attempt} failed: ${lastError.message}`);
+        
+        // Don't retry on certain errors
+        if (lastError.message.includes('challenge_required') || 
+            lastError.message.includes('checkpoint_required')) {
+          throw lastError; // These errors won't be fixed by retrying
+        }
+      }
+    }
+    
+    // All attempts failed
+    throw new Error(`Authentication failed after ${maxRetries} attempts. Last error: ${lastError?.message || 'Unknown error'}`);
   }
 
   private ensureAuthenticated(): void {
@@ -240,6 +300,24 @@ export class InstagramClient {
       }));
     } catch (error) {
       throw new Error(`Failed to get user media: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async saveSession(): Promise<string> {
+    try {
+      return JSON.stringify(await this.client.state.serialize());
+    } catch (error) {
+      throw new Error(`Failed to save session: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async loadSession(sessionData: string): Promise<void> {
+    try {
+      await this.client.state.deserialize(sessionData);
+      this.isAuthenticated = true;
+    } catch (error) {
+      this.isAuthenticated = false;
+      throw new Error(`Failed to load session: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

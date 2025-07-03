@@ -39,6 +39,18 @@ export class InstagramCredentials implements ICredentialType {
 			description: 'Optional HTTP proxy URL for requests',
 			placeholder: 'http://proxy.example.com:8080',
 		},
+		{
+			displayName: 'Session Data',
+			name: 'sessionData',
+			type: 'string',
+			typeOptions: {
+				password: true,
+			},
+			default: '',
+			required: false,
+			description: 'Optional: Saved session data to avoid repeated logins (advanced users only)',
+			placeholder: 'Leave empty for normal username/password authentication',
+		},
 	];
 
 	async authenticate(

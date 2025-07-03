@@ -142,6 +142,17 @@ This node leverages the powerful `instagram-private-api` library to provide acce
 
 ## Troubleshooting
 
+### 🔧 **Authentication Issues**
+
+For detailed authentication troubleshooting, see [AUTHENTICATION_GUIDE.md](./AUTHENTICATION_GUIDE.md).
+
+**Quick fixes for "400 Bad Request" errors:**
+
+1. **Log into Instagram app first** and complete any verification challenges
+2. **Use a dedicated account** (not your personal account) for automation
+3. **Disable 2FA temporarily** during initial setup
+4. **Wait between retry attempts** - Instagram heavily rate limits
+
 ### 🔧 **Credential Issues**
 
 If you see **"Node does not have any credentials set"**:
@@ -155,7 +166,7 @@ If you see **"Node does not have any credentials set"**:
    - Select the newly created credential in your node
    - Save and re-execute the workflow
 
-### 📊 **Common Configuration**
+### 📊 **Credential Configuration**
 
 ```json
 // Credential Configuration
@@ -181,7 +192,18 @@ If you see **"Node does not have any credentials set"**:
 
 ## Version History
 
-* **0.0.6** (Current):
+* **0.0.7** (Current):
+  - 🚀 **MAJOR AUTHENTICATION IMPROVEMENTS**: Enhanced Instagram login reliability
+  - ✅ Added pre/post login flow simulation for better bot detection avoidance
+  - ✅ Implemented retry authentication with exponential backoff
+  - ✅ Enhanced error handling with specific Instagram error messages
+  - ✅ Added session data support for persistent authentication
+  - ✅ Improved credential fields with session data option
+  - ✅ Better error messages for challenge_required, checkpoint_required
+  - ✅ Created comprehensive AUTHENTICATION_GUIDE.md
+  - ✅ More robust handling of rate limiting and bot detection
+
+* **0.0.6**:
   - 🔧 **CRITICAL FIX**: Resolved credential configuration issues in n8n
   - ✅ Fixed inconsistent credential naming (`instagramCredentials` → `instagramApi`)
   - ✅ Added optional `proxyUrl` field to credentials for proxy support
