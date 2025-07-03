@@ -7,8 +7,8 @@ import {
 } from 'n8n-workflow';
 
 export class InstagramCredentials implements ICredentialType {
-	name = 'instagramCredentials';
-	displayName = 'Instagram Credentials';
+	name = 'instagramApi';
+	displayName = 'Instagram API';
 	documentationUrl = 'https://github.com/tiagohintz/n8n-nodes-instagram-private-api';
 	properties: INodeProperties[] = [
 		{
@@ -17,7 +17,7 @@ export class InstagramCredentials implements ICredentialType {
 			type: 'string',
 			default: '',
 			required: true,
-			description: 'Your Instagram username',
+			description: 'Your Instagram username or email',
 		},
 		{
 			displayName: 'Password',
@@ -29,6 +29,15 @@ export class InstagramCredentials implements ICredentialType {
 			default: '',
 			required: true,
 			description: 'Your Instagram password',
+		},
+		{
+			displayName: 'Proxy URL',
+			name: 'proxyUrl',
+			type: 'string',
+			default: '',
+			required: false,
+			description: 'Optional HTTP proxy URL for requests',
+			placeholder: 'http://proxy.example.com:8080',
 		},
 	];
 

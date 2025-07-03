@@ -19,11 +19,32 @@ This is an n8n community node for Instagram automation using the instagram-priva
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-You can install this node package using:
+### 📦 **Install via npm**
 
 ```bash
-npm install n8n-nodes-instagram-private-api-wrapped
+# Latest version (recommended)
+npm install n8n-nodes-instagram-private-api-wrapped@latest
+
+# Specific version 0.0.6 (with credential fixes)
+npm install n8n-nodes-instagram-private-api-wrapped@0.0.6
 ```
+
+### 🔄 **Updating from Previous Versions**
+
+If upgrading from v0.0.5 or earlier:
+
+```bash
+# Uninstall old version
+npm uninstall n8n-nodes-instagram-private-api-wrapped
+
+# Install latest version
+npm install n8n-nodes-instagram-private-api-wrapped@latest
+
+# Restart n8n
+npm run start
+```
+
+**Note**: You may need to recreate your credentials after updating to v0.0.6 due to credential name changes.
 
 ## Operations
 
@@ -49,8 +70,10 @@ This node provides the following operations organized by resource type:
 This node requires Instagram login credentials configured through n8n's credential system:
 
 - **Username**: Your Instagram username or email
-- **Password**: Your Instagram password
+- **Password**: Your Instagram password  
 - **Proxy URL** (Optional): HTTP proxy URL for requests
+
+> **🚨 Important**: Starting from v0.0.6, credentials are named **"Instagram API"** (previously "Instagram Credentials"). You may need to recreate your credentials after updating.
 
 ### 🔒 **Security Considerations**
 - Uses n8n's secure credential storage system
@@ -117,6 +140,38 @@ This node leverages the powerful `instagram-private-api` library to provide acce
 - Monitor for rate limit responses and implement backoff strategies
 - Keep credentials secure and rotate them regularly
 
+## Troubleshooting
+
+### 🔧 **Credential Issues**
+
+If you see **"Node does not have any credentials set"**:
+
+1. **Check Credential Name**: Ensure you're using **"Instagram API"** (not "Instagram Credentials")
+2. **Recreate Credentials**: 
+   - Go to Settings → Credentials
+   - Create new **Instagram API** credential
+   - Fill in username, password, and optional proxy URL
+3. **Node Configuration**: 
+   - Select the newly created credential in your node
+   - Save and re-execute the workflow
+
+### 📊 **Common Configuration**
+
+```json
+// Credential Configuration
+{
+  "username": "your_instagram_username",
+  "password": "your_secure_password", 
+  "proxyUrl": "http://proxy.example.com:8080" // Optional
+}
+```
+
+### 🐛 **Error Handling**
+
+- **Authentication Failed**: Check username/password, consider 2FA issues
+- **Rate Limited**: Add delays between requests (2-5 seconds)
+- **API Changes**: Update to latest version if Instagram API changes
+
 ## Resources
 
 * [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
@@ -126,7 +181,17 @@ This node leverages the powerful `instagram-private-api` library to provide acce
 
 ## Version History
 
-* **0.0.5** (Current):
+* **0.0.6** (Current):
+  - 🔧 **CRITICAL FIX**: Resolved credential configuration issues in n8n
+  - ✅ Fixed inconsistent credential naming (`instagramCredentials` → `instagramApi`)
+  - ✅ Added optional `proxyUrl` field to credentials for proxy support
+  - ✅ Improved credential descriptions and field validation
+  - ✅ Enhanced credential display name for better UX
+  - ✅ Corrected export configuration for proper n8n integration
+  - ✅ Validated credential flow from configuration to node execution
+  - ✅ Clean build process with unnecessary files removed
+
+* **0.0.5**:
   - ✅ Full TypeScript implementation with comprehensive type safety
   - ✅ Complete InstagramClient with all essential methods
   - ✅ Proper authentication flow and error handling
